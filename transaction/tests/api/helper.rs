@@ -1,4 +1,5 @@
 use transaction::Application;
+use uuid::Uuid;
 
 pub struct TestApp {
     pub address: String,
@@ -34,4 +35,19 @@ impl TestApp {
             .await
             .expect("Failed to send health check request")
     }
+
+    pub async fn create_tx<Body>(&self, body: &Body) -> reqwest::Response
+    where
+    Body: serde::Serialize
+     {
+        self.http_client
+            .get(&format!("{}/create-tx", self.address))
+            .send()
+            .await
+            .expect("Failed to send health check request")
+    }
+}
+
+pub fn get_random_email() -> String {
+    format!("{}@example.com", Uuid::new_v4())
 }

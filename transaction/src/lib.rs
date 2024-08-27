@@ -2,9 +2,11 @@ use std::error::Error;
 
 use axum::{
     http::StatusCode, response::IntoResponse, serve::Serve, Router,
-    routing::get
+    routing::{get,post}
 };
 
+pub mod domain;
+pub mod routes;
 
 
 pub struct Application {
@@ -15,7 +17,8 @@ pub struct Application {
 impl Application {
     pub async fn build(address: &str) -> Result<Self, Box<dyn Error>> {
         let app = Router::new()
-            .route("/", get(health_check));
+            .route("/", get(health_check))
+            .route("/create-tx", post(routes::create_tx));
 
         let router = app;
 
