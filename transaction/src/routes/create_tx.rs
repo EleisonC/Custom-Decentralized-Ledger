@@ -2,6 +2,8 @@ use axum::{http::StatusCode, extract::State,
     response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 
+use crate::app_state::AppState;
+
 
 #[derive(Deserialize)]
 pub struct CreationRequest {
@@ -16,7 +18,8 @@ pub struct CreationResponse {
 }
 
 
-pub async fn create_tx(Json(request): Json<CreationRequest>) -> impl IntoResponse {
+pub async fn create_tx(State(state): State<AppState>, Json(request): Json<CreationRequest>) -> impl IntoResponse {
+    // let sender_info = 
     
 }
 

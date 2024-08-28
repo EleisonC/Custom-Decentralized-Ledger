@@ -1,5 +1,6 @@
 use crate::domain::{Transaction, TransactionStore, TransactionStoreError};
 
+#[derive(Default, Debug)]
 pub struct VecTransactionsStore {
     transactions_list: Vec<Transaction>
 }

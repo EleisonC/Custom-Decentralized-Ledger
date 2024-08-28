@@ -1,4 +1,7 @@
-use transaction::Application;
+use std::sync::Arc;
+
+use tokio::sync::RwLock;
+use transaction::{app_state::AppState, services::VecTransactionsStore, Application};
 use uuid::Uuid;
 
 pub struct TestApp {
@@ -8,7 +11,10 @@ pub struct TestApp {
 
 impl TestApp {
     pub async fn new() -> Self {
-        let app = Application::build("127.0.0.1:0")
+        let transaction_store = Arc::new(RwLock::new(VecTransactionsStore::default()));
+        let test_app_state = AppState::new(transaction_store);
+
+        let app = Application::build(test_app_state,"127.0.0.1:0")
             .await
             .expect("Failed to build test app");
 
