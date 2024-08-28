@@ -5,9 +5,12 @@ use axum::{
     routing::{get,post}
 };
 
+use app_state::AppState;
+
 pub mod domain;
 pub mod routes;
 pub mod services;
+pub mod app_state;
 
 
 pub struct Application {
@@ -16,10 +19,11 @@ pub struct Application {
 }
 
 impl Application {
-    pub async fn build(address: &str) -> Result<Self, Box<dyn Error>> {
+    pub async fn build(app_state: AppState, address: &str) -> Result<Self, Box<dyn Error>> {
         let app = Router::new()
             .route("/", get(health_check))
-            .route("/create-tx", post(routes::create_tx));
+            .route("/create-tx", post(routes::create_tx))
+            .with_state(app_state.clone());
 
         let router = app;
 

@@ -17,6 +17,6 @@ pub struct CreationResponse {
 
 
 pub async fn create_tx(Json(request): Json<CreationRequest>) -> impl IntoResponse {
-    StatusCode::OK.into_response()
+    
 }
 
