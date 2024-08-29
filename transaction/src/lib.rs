@@ -1,16 +1,39 @@
 use std::error::Error;
 
 use axum::{
-    http::StatusCode, response::IntoResponse, serve::Serve, Router,
-    routing::{get,post}
+    http::StatusCode, response::{IntoResponse, Response}, routing::{get,post}, serve::Serve, Json, Router
 };
 
 use app_state::AppState;
+use domain::TransactionAPIErrors;
+use serde::{Deserialize, Serialize};
 
 pub mod domain;
 pub mod routes;
 pub mod services;
 pub mod app_state;
+
+
+#[derive(Serialize, Deserialize)]
+pub struct ErrorResponse {
+    pub error: String,
+}
+
+impl IntoResponse for TransactionAPIErrors {
+    fn into_response(self) -> Response {
+        let (status, error_message) = match self {
+            TransactionAPIErrors::InvalidInformation => (StatusCode::CONFLICT, "Invalid information"),
+            TransactionAPIErrors::TransactionNotFound => (StatusCode::NOT_FOUND, "Record Not Found"),
+            TransactionAPIErrors::UnexpectedError => (StatusCode::INTERNAL_SERVER_ERROR, "Uexpected error"),
+        };
+
+        let body = Json(ErrorResponse {
+            error: error_message.to_string(),
+        });
+    
+        (status, body).into_response()
+    }
+}
 
 
 pub struct Application {

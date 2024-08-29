@@ -1,10 +1,12 @@
 use chrono::{DateTime, Utc};
 
+use super::Email;
+
 
 #[derive(Clone, Debug)]
 pub struct Transaction {
-    pub  sender: String,
-    pub recipient: String,
+    pub  sender: Email,
+    pub recipient: Email,
     pub amount: u64,
     pub txid: Option<String>,
     pub timestamp: DateTime<Utc>,
@@ -12,7 +14,7 @@ pub struct Transaction {
 }
 
 impl Transaction {
-    pub fn new(sender: String, recipient: String, amount: u64) -> Self {
+    pub fn new(sender: Email, recipient: Email, amount: u64) -> Self {
         Transaction {
             sender,
             recipient,

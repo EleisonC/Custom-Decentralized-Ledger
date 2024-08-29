@@ -47,7 +47,8 @@ impl TestApp {
     Body: serde::Serialize
      {
         self.http_client
-            .get(&format!("{}/create-tx", self.address))
+            .post(&format!("{}/create-tx", self.address))
+            .json(body)
             .send()
             .await
             .expect("Failed to send health check request")
