@@ -25,6 +25,7 @@ impl IntoResponse for TransactionAPIErrors {
             TransactionAPIErrors::InvalidInformation => (StatusCode::CONFLICT, "Invalid information"),
             TransactionAPIErrors::TransactionNotFound => (StatusCode::NOT_FOUND, "Record Not Found"),
             TransactionAPIErrors::UnexpectedError => (StatusCode::INTERNAL_SERVER_ERROR, "Uexpected error"),
+            TransactionAPIErrors::InvalidIndex => (StatusCode::CONFLICT, "Invalid transaction index")
         };
 
         let body = Json(ErrorResponse {
@@ -46,6 +47,8 @@ impl Application {
         let app = Router::new()
             .route("/", get(health_check))
             .route("/create-tx", post(routes::create_tx))
+            .route("/get-all-transactions", get(routes::get_all_tx))
+            .route("/get-transaction-by-index/:tx_index", get(routes::get_transaction_by_index))
             .with_state(app_state.clone());
 
         let router = app;

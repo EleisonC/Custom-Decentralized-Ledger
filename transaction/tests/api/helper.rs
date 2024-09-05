@@ -53,6 +53,22 @@ impl TestApp {
             .await
             .expect("Failed to send health check request")
     }
+
+    pub async fn get_all_transactions(&self) -> reqwest::Response { 
+        self.http_client
+            .get(&format!("{}/get-all-transactions", self.address))
+            .send()
+            .await
+            .expect("Failed to send health check request")
+    }
+
+    pub async fn get_one_transaction_by_index(&self, index: u32) -> reqwest::Response { 
+        self.http_client
+            .get(&format!("{}/get-transaction-by-index/{index}", self.address))
+            .send()
+            .await
+            .expect("Failed to send health check request")
+    }
 }
 
 pub fn get_random_email() -> String {
