@@ -1,7 +1,6 @@
 
 use axum::{extract::{State, Path}, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::{app_state::AppState, domain::{Transaction, TransactionAPIErrors}};
 

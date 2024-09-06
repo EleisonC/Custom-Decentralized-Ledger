@@ -12,6 +12,7 @@ pub mod domain;
 pub mod routes;
 pub mod services;
 pub mod app_state;
+pub mod utils;
 
 
 #[derive(Serialize, Deserialize)]
@@ -25,7 +26,8 @@ impl IntoResponse for TransactionAPIErrors {
             TransactionAPIErrors::InvalidInformation => (StatusCode::CONFLICT, "Invalid information"),
             TransactionAPIErrors::TransactionNotFound => (StatusCode::NOT_FOUND, "Record Not Found"),
             TransactionAPIErrors::UnexpectedError => (StatusCode::INTERNAL_SERVER_ERROR, "Uexpected error"),
-            TransactionAPIErrors::InvalidIndex => (StatusCode::CONFLICT, "Invalid transaction index")
+            TransactionAPIErrors::InvalidIndex => (StatusCode::CONFLICT, "Invalid transaction index"),
+            TransactionAPIErrors::FailedToSignTransaction => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to sign the transaction")
         };
 
         let body = Json(ErrorResponse {

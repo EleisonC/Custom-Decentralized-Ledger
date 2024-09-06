@@ -6,12 +6,13 @@ use super::Email;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Transaction {
-    pub  sender: Email,
+    pub sender: Email,
     pub recipient: Email,
     pub amount: u64,
     pub txid: Option<String>,
     pub timestamp: DateTime<Utc>,
-    pub signature: Option<String>
+    pub signature: Option<String>,
+    pub tx_status: String
 }
 
 impl Transaction {
@@ -23,6 +24,7 @@ impl Transaction {
             txid: None,
             timestamp: Utc::now(),
             signature: None,
+            tx_status: "pending".to_string()
         }
     }
 }
