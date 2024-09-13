@@ -21,10 +21,16 @@ pub fn generate_private_key() -> Result<(), String> {
 
     let filename = format!("eleisonC-chain-pk-{}.txt", formatted_time);
 
-    let mut file = match File::create(filename) {
-        Ok(file) => file,
+    let file = match File::create(filename.clone()) {
+        Ok(mut file) => file.write_all(&private_key_bytes),
         Err(err) => return Err(format!("Failed to create file: {}", err))
     };
+
+    if let Err(e) = file {
+        return Err(format!("Failed to write to file: {}", e));
+    }
+
+    println!("Private key saved to: {}", filename);
 
     Ok(())
 }

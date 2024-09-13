@@ -11,4 +11,8 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Commands {
     Generate,
+    Display {
+        #[arg(short, long)]
+        file_path: String,
+    }
 }

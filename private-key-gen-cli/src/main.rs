@@ -1,5 +1,6 @@
 mod models;
 mod ecrypto;
+mod utils;
 
 use models::{Cli, Commands};
 use ecrypto::generate_private_key;
@@ -14,5 +15,11 @@ fn main() {
                 eprintln!("Error generating private key: {}", e);
             }
         }
+        Commands::Display { file_path } => {
+            if let Err(e) = utils::display_file_content(file_path) {
+                eprintln!("Error displaying file content: {}", e);
+            }
+        }
+
     }
 }
