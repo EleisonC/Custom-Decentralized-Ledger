@@ -14,7 +14,7 @@ pub fn generate_private_key() -> Result<(), String> {
         Err(err) => return Err(format!("Failed to generate private key: {}", err))
     };
 
-    let private_key_bytes = private_key_pkcs8.as_ref().to_vec();
+    let private_key_bytes = private_key_pkcs8.as_ref();
 
     let current_time = Utc::now();
     let formatted_time = current_time.format("%Y-%m-%d-%H-%M-%S");
@@ -22,7 +22,7 @@ pub fn generate_private_key() -> Result<(), String> {
     let filename = format!("eleisonC-chain-pk-{}.txt", formatted_time);
 
     let file = match File::create(filename.clone()) {
-        Ok(mut file) => file.write_all(&private_key_bytes),
+        Ok(mut file) => file.write_all(private_key_bytes),
         Err(err) => return Err(format!("Failed to create file: {}", err))
     };
 

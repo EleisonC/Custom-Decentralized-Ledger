@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use axum::{
-    http::StatusCode, response::{IntoResponse, Response}, routing::{get,post}, serve::Serve, Json, Router
+    http::StatusCode, response::{IntoResponse, Response}, routing::{get,post, put}, serve::Serve, Json, Router
 };
 
 use app_state::AppState;
@@ -27,7 +27,8 @@ impl IntoResponse for TransactionAPIErrors {
             TransactionAPIErrors::TransactionNotFound => (StatusCode::NOT_FOUND, "Record Not Found"),
             TransactionAPIErrors::UnexpectedError => (StatusCode::INTERNAL_SERVER_ERROR, "Uexpected error"),
             TransactionAPIErrors::InvalidIndex => (StatusCode::CONFLICT, "Invalid transaction index"),
-            TransactionAPIErrors::FailedToSignTransaction => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to sign the transaction")
+            TransactionAPIErrors::FailedToSignTransaction => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to sign the transaction"),
+            TransactionAPIErrors::SigningError => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to sign the transaction")
         };
 
         let body = Json(ErrorResponse {
@@ -51,6 +52,7 @@ impl Application {
             .route("/create-tx", post(routes::create_tx))
             .route("/get-all-transactions", get(routes::get_all_tx))
             .route("/get-transaction-by-index/:tx_index", get(routes::get_transaction_by_index))
+            .route("/sign-transaction/:tx_index", put(routes::sign_transaction))
             .with_state(app_state.clone());
 
         let router = app;

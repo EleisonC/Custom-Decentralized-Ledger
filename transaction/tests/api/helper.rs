@@ -69,6 +69,17 @@ impl TestApp {
             .await
             .expect("Failed to send health check request")
     }
+
+    pub async fn sign_transaction<Body>(&self, index: u32, body: &Body) -> reqwest::Response
+    where 
+    Body: serde::Serialize {
+        self.http_client
+            .put(&format!("{}/sign-transaction/{index}", self.address))
+            .json(body)
+            .send()
+            .await
+            .expect("Failed to sign transaction")
+    }
 }
 
 pub fn get_random_email() -> String {
