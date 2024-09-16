@@ -1,8 +1,7 @@
 use crate::domain::{Transaction, TransactionAPIErrors};
 use sha2::{Sha256, Digest};
-use ring::{rand, signature};
-use ring::signature::{EcdsaKeyPair, KeyPair, Signature, ECDSA_P256_SHA256_FIXED_SIGNING};
-use ring::pkcs8::Document;
+use ring::rand;
+use ring::signature::{EcdsaKeyPair, Signature, ECDSA_P256_SHA256_FIXED_SIGNING};
 
 pub fn sign_my_tx(transaction: &mut Transaction, private_key: &[u8]) -> Result<(), TransactionAPIErrors> {
     let tx_vec = serialize_tx(transaction).map_err(|err_msg| {
@@ -35,11 +34,12 @@ fn sign_transaction(private_key: &[u8], hashed_tx: &[u8]) ->  Result<Signature, 
     let rng = rand::SystemRandom::new();
 
     let key_pair = EcdsaKeyPair::from_pkcs8(&ECDSA_P256_SHA256_FIXED_SIGNING, private_key, &rng).map_err(|err_msg| {
-        println!("This could be the error message 1: {}", err_msg);
-        TransactionAPIErrors::FailedToSignTransaction})?;
+        eprintln!("This could be the error message 1: {}", err_msg);
+        TransactionAPIErrors::FailedToSignTransaction
+    })?;
 
     key_pair.sign(&rng, hashed_tx).map_err(|err_msg| {
-        println!("This could be the error message 2: {}", err_msg);
+        eprintln!("This could be the error message 2: {}", err_msg);
         TransactionAPIErrors::FailedToSignTransaction
     })
 }
@@ -70,6 +70,19 @@ mod test {
         
         assert!(tx.signature.is_some(), "Expected the signature to be present in the response");
         assert_eq!(tx.tx_status, "transaction signed", "Expected the tx_status to be 'transaction signed'")
+    }
+
+    #[tokio::test]
+    async fn it_fails_to_sign_transaction_with_invalid_private_key() {
+        let invalid_private_key = "invalid_private_key";
+        let send_mail = Email::parse("send@mail.com".to_owned()).unwrap();
+        let receive_mail = Email::parse("receive@mail.com".to_owned()).unwrap();
+        let mut tx = Transaction::new(send_mail, receive_mail, 20);
+
+        match sign_my_tx(&mut tx, invalid_private_key.as_bytes()) {
+            Ok(_) => panic!("Expected signing to fail, but it succeeded."),
+            Err(_) => assert!(tx.signature.is_none(), "Expected the signature to be absent in the response"),
+        }
     }
 }
 

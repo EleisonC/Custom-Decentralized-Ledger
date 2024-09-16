@@ -23,7 +23,7 @@ pub async fn sign_transaction(
 
     let mut transaction = transaction_store.get_transaction_by_index(tx_index).await.map_err(|_| TransactionAPIErrors::TransactionNotFound)?;
 
-    let private_key_bytes = hex::decode(request.signature).expect("Failed to decode hex string");
+    let private_key_bytes = hex::decode(request.signature).map_err(|_|  TransactionAPIErrors::SigningError)?;
 
     sign_my_tx(&mut transaction, &private_key_bytes).map_err(|_|  TransactionAPIErrors::SigningError)?;
 

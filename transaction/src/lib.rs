@@ -28,7 +28,7 @@ impl IntoResponse for TransactionAPIErrors {
             TransactionAPIErrors::UnexpectedError => (StatusCode::INTERNAL_SERVER_ERROR, "Uexpected error"),
             TransactionAPIErrors::InvalidIndex => (StatusCode::CONFLICT, "Invalid transaction index"),
             TransactionAPIErrors::FailedToSignTransaction => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to sign the transaction"),
-            TransactionAPIErrors::SigningError => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to sign the transaction")
+            TransactionAPIErrors::SigningError => (StatusCode::BAD_REQUEST, "Failed to sign the transaction")
         };
 
         let body = Json(ErrorResponse {
