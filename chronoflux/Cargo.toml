@@ -1,0 +1,16 @@
+[package]
+name = "chronoflux"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = { version = "0.4.38", features = ["serde"] }
+rand = "0.8"
+num-bigint = { version = "0.4", features = ["rand"] }
+ring = "0.17.8"
+data-encoding = "2.3.2"
+bincode = "1.3.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
