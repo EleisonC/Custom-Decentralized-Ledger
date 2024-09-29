@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use bincode::{serialize, deserialize};
 use serde::{Deserialize, Serialize};
+use sled::IVec;
 
 use crate::utils::sha256_digest;
 
@@ -75,3 +76,10 @@ impl Block {
     }
 
 }
+
+impl From<Block> for IVec {
+    fn from(b: Block) -> Self {
+        let bytes = bincode::serialize(&b).unwrap();
+        Self::from(bytes)
+    }
+} 
