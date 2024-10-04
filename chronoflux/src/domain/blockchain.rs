@@ -1,7 +1,7 @@
 use std::{env::current_dir, sync::{Arc, RwLock}};
 use sled::{transaction::TransactionError, Db, Tree};
 
-use super::{block, Block, Transaction};
+use super::{block, transactions, Block, Transaction};
 
 const TIP_BLOCK_HASH_KEY: &str = "top_of_the_block_hash";
 const BLOCKS_TREE: &str = "blocks";
@@ -78,7 +78,61 @@ impl Blockchain {
         self.tip_hash.read().unwrap().clone()
     }
 
+    pub fn set_tip_hash(&self, new_tip_hash: &str) {
+        let mut tip_hash = self.tip_hash.write().unwrap();
+        *tip_hash = String::from(new_tip_hash)
+    }
 
+    pub fn mine_block(&self, transactions: &[Transaction]) -> Block {
+        for transaction in transactions {
+            if transaction.verify(self) = false {
+                panic!("Error: Invalid transaction")
+            }
+        }
+
+        let best_height = self.get_best_height();
+
+        let block = Block::new_block(self.get_tip_hash(), transactions, best_height + 1);
+        let block_hash = block.get_hash();
+
+        let blocks_tree = self.db.open_tree(BLOCKS_TREE).unwrap();
+        Self::update_blocks_tree(&blocks_tree, block);
+        self.set_tip_hash(block_hash);
+        block
+    }
+
+    pub fn iterator(&self) -> BlockchainIterator {
+        BlockchainIterator::new(self.get_tip_hash(), self.db.clone())
+    }
+
+    pub fn add_block(&self, block: &Block) ->Result<(), String> {
+        let block_tree = self.db.open_tree(BLOCKS_TREE).unwrap();
+
+        if let Some(_) = block_tree.get(block.get_hash().unwrap()).unwrap() {
+           return Err("This block already exists".to_string())
+        }
+
+        let result: Result<(), TransactionError<String>> = block_tree.transaction(|tx_db| {
+            tx_db.insert(block.get_hash().unwrap(), block.serialize()).map_err(|err| {
+                format!("Error adding new block. The error is: {}", err)
+            });
+
+            let tip_block_bytes = tx_db
+                .get(self.get_tip_hash())
+                .unwrap()
+                .expect("The tip of the hash is not valid");
+
+            let tip_block = Block::deserialize(tip_block_bytes.as_ref());
+            if block.get_height() > tip_block.get_height() {
+                tx_db.insert(TIP_BLOCK_HASH_KEY, block.get_hash().unwrap()).map_err(|err| {
+                    format!("Error adding new block. The error is: {}", err)
+                });
+                self.set_tip_hash(block.get_hash().unwrap());
+            }
+            Ok(())
+        });
+        Ok(())
+    }
 }
 
 pub struct BlockchainIterator {
@@ -104,7 +158,7 @@ impl BlockchainIterator {
 
         let block = Block::deserialize(data.unwrap().to_vec().as_slice());
         self.current_hash = block.get_pre_block_hash().clone();
-        
+
         Some(block)
     }
 }
