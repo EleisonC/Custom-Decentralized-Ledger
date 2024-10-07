@@ -1,7 +1,8 @@
-use std::{env::current_dir, sync::{Arc, RwLock}};
+use std::{collections::HashMap, env::current_dir, sync::{Arc, RwLock}};
+use data_encoding::HEXLOWER;
 use sled::{transaction::TransactionError, Db, Tree};
 
-use super::{block, transactions, Block, Transaction};
+use super::{block, transactions, Block, TXOutput, Transaction};
 
 const TIP_BLOCK_HASH_KEY: &str = "top_of_the_block_hash";
 const BLOCKS_TREE: &str = "blocks";
@@ -132,6 +133,68 @@ impl Blockchain {
             Ok(())
         });
         Ok(())
+    }
+
+    pub fn find_utxo(&self) -> HashMap<String, Vec<TXOutput>> {
+        let mut utxo: HashMap<String, Vec<TXOutput>> = HashMap::new();
+        let mut spent_txos: HashMap<String, Vec<usize>> = HashMap::new();
+
+        let mut iterator = self.iterator();
+        loop {
+            let option = iterator.next();
+            if option.is_none() {
+                break;
+            }
+            let block = option.unwrap();
+            'outer: for tx in block.get_transactions() {
+                let txid_hex = HEXLOWER.encode(tx.get_id());
+                for (idx, out) in tx.get_vout.iter().enumerate {
+
+                    if let Some(outs) = spent_txos.get(txid_hex.as_str()) {
+                        for spend_out_idx in outs {
+                            if idx.eq(spend_out_idx) {
+                                continue 'outer;
+                            }
+                        }
+                    }
+                    if tx.is_chronoflux() {
+                        continue;
+                    }
+
+                    for txin in tx.get_vin() {
+                        let txid_hex = HEXLOWER.encode(tx.get_id());
+                        if spent_txos.contains_key(txid_hex.as_str()) {
+                            spent_txos
+                                .get_mut(txid_hex.as_str())
+                                .unwrap()
+                                .push(txin.get_vout());
+                        } else {
+                            spent_txos.insert(txid_hex, vec![txin.get_vout()]);
+                        }
+                    }
+                }
+            }
+        }
+        utxo
+    }
+
+    pub fn find_transaction(&self, txid: &[u8]) -> Option<Transaction> {
+        let mut iterator = self.iterator();
+        loop {
+            let option = iterator.next();
+
+            if option.is_none() {
+                break;
+            }
+
+            let block = option.unwrap();
+            for transaction in block.get_transactions() {
+                if txid.eq(transaction.get_id()) {
+                    return Some(transaction.clone());
+                }
+            }
+        }
+        None
     }
 }
 
