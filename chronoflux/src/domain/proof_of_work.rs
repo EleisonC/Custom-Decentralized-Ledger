@@ -1,5 +1,5 @@
 use num_bigint::{BigInt, Sign};
-use super::Block;
+use super::{transactions, Block};
 use std::{borrow::Borrow, ops::ShlAssign};
 use crate::utils::sha256_digest;
 use data_encoding::HEXLOWER;
@@ -26,6 +26,20 @@ impl ProofOfWork {
         }
     }
 
+    fn prepare_data(&self, nonce: i64) -> Vec<u8> {
+        let pre_block_hash = self.block.get_pre_block_hash();
+        let transactions_hash = self.block.hash_transactions();
+        let timestamp = self.block.get_timestamp();
+
+        let mut data_bytes = vec![];
+        data_bytes.extend(pre_block_hash.as_bytes());
+        data_bytes.extend(transactions_hash);
+        data_bytes.extend(timestamp.timestamp().to_be_bytes());
+        data_bytes.extend(TARGET_BITS.to_be_bytes());
+        data_bytes.extend(nonce.to_be_bytes());
+        data_bytes
+    }
+
     pub fn run(&self) -> (i64, String) {
         let mut nounce = 0;
 
@@ -49,4 +63,18 @@ impl ProofOfWork {
         println!();
         return (nounce, HEXLOWER.encode(hash.as_slice()))
     }
+}
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::{Block, Transaction};
+
+    #[test]
+    fn test_new_proof_of_work_func() {
+    
+    }
+
 }
